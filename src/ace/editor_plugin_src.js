@@ -36,10 +36,7 @@
                 var w = arguments.length > 1 ? arguments[1] : null;
 
                 if (w instanceof Window && w.location.href.substr(w.location.href.length - pageName.length, pageName.length) === pageName){
-                    // Give the beautifier time to do it's thing (if it's present).
-                    setTimeout(function(){
-                        loadScripts(url, w);
-                    }, 1500);
+                    loadScripts(url, w);
                 }
 
             });
@@ -65,26 +62,8 @@
 
     function loadScripts(url, win, callback){
 
-        var i = 0;
-
-        if (scripts.length === 0){
-            if (typeof callback === 'function'){
-                callback();
-            }
-        } else {
-            loadScript(url + scripts[i], win, nextScript);
-        }
-
-        function nextScript(){
-
-            if (++i < scripts.length){
-                loadScript(url + scripts[i], win, nextScript);
-            } else {
-                if (typeof callback === 'function'){
-                    callback();
-                }
-            }
-
+        for (var i = 0; i < scripts.length; i++){
+            loadScript(url + scripts[i], win);
         }
 
     }

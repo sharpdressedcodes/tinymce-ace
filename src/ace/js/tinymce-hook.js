@@ -44,25 +44,23 @@
     var prettyPrinter = null;
 
     var PrettyPrinter = function(options) {
-        
+
         this.initialEl = options.initialEl;
-        this.isLegacy = options.isLegacy;
         this.isHtml = options.isHtml;
-        this.margintop = (this.isLegacy ? '0' : '-5') + 'px';
         this.initialEl.style.display = "none";
-       
+
         this.buildEl();
         this.buildAce();
         this.normalScreen();
         this.initTheme();
-        this.buildOpt(this.margintop);
-    
+        this.buildOpt();
+
         window.prettyPrinter = this;
-        
+
     };
 
     PrettyPrinter.prototype = {
-        
+
         buildEl: function(){
 
             this.el = document.createElement("div");
@@ -79,6 +77,8 @@
             var theme = localStorage.getItem('theme');
 
             this.cboTheme = document.createElement('select');
+            this.cboTheme.style.marginBottom = '5px';
+            this.cboTheme.style.marginRight = '2px';
 
             for (var i = 0, i_ = aceThemes.length; i < i_; i++){
                 var option = document.createElement('option');
@@ -100,11 +100,11 @@
             this.el.appendChild(this.editorEl);
 
             this.initialEl.parentNode.insertBefore(this.el, this.initialEl);
-            
+
         },
-        
+
         initTheme: function() {
-            
+
             this.cboTheme.addEventListener('change', this.onThemeChange.bind(this), false);
             this.cboTheme.addEventListener('click', this.onThemeChange.bind(this), false);
             this.cboTheme.addEventListener('keydown', this.onThemeChange.bind(this), false);
@@ -116,9 +116,9 @@
             }
 
             this.aceEditor.setTheme(theme);
-            
+
         },
-        
+
         buildAce: function() {
 
             this.aceEditor = ace.edit('description');
@@ -129,11 +129,11 @@
             this.aceSession.setMode('ace/mode/' + (this.isHtml ? 'html' : 'javascript'));
             this.aceSession.setFoldStyle('markbeginend');
             this.aceSession.setValue(this.initialEl.value);
-            
+
             this.aceSession.on('change', function(){
                 this.initialEl.value = this.aceSession.getValue();
             }.bind(this));
-            
+
         },
 
         onThemeChange: function() {
@@ -158,11 +158,11 @@
             this.editorEl.style.width = "100%";
 
             this.aceEditor.resize();
-            this.buildOpt(this.margintop);
+            this.buildOpt();
 
         },
 
-        buildOpt: function(margintop) {
+        buildOpt: function() {
 
             var zIndex = parseInt(getComputedStyle(this.el, null)['zIndex'], 10);
 
@@ -190,8 +190,6 @@
     function setup(){
 
         window.addEventListener('load', onLoad, false);
-        //window.addEventListener('resize', onResize, false);
-
         onLoad();
 
     }
@@ -202,7 +200,16 @@
             loadStyle();
         }
 
-        loadEditor();
+        if (typeof window.ace !== 'undefined'){
+            loadEditor();
+        } else {
+            var interval = setInterval(function(){
+                if (typeof window.ace !== 'undefined'){
+                    clearInterval(interval);
+                    loadEditor();
+                }
+            }, 500);
+        }
 
     }
 
@@ -245,7 +252,6 @@
 
         return {
             initialEl: document.getElementById(textAreaId),
-            isLegacy: true,
             isHtml: true
         };
 
@@ -267,7 +273,6 @@
             window.moveTo(0, 0);
             window.resizeTo(screen.availWidth, screen.availHeight);
 
-            addAceTitle();
             onResize();
 
             window.addEventListener('resize', onResize, false);
@@ -292,17 +297,7 @@
     function onResize(event){
 
         var el = document.querySelector('#description');
-        el && (el.style.height = (window.innerHeight - 60) + 'px');
-
-    }
-
-    function addAceTitle(){
-
-        var ace = 'Ace ';
-        var label = document.querySelector('label[for="' + textAreaId + '"]');
-
-        label && (label.textContent = ace + label.textContent);
-        document.title = ace + document.title;
+        el && (el.style.height = (window.innerHeight - 65) + 'px');
 
     }
 
